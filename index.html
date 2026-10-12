@@ -9706,7 +9706,8 @@ const Exporter = (() => {
     B.fill(0x20, 463 - idx.length);
     /* PEC stitches */
     const start = B.length; B.u8(0).u8(0).u24(0).u8(0x31).u8(0xff).u8(0xf0).u16(width).u16(height).u16(0x1E0).u16(0x1B0);
-    let xx = 0, yy = 0, jumping = true, init = true, two = true;
+    /* Brother machines take the start of the PEC stitch stream as the design's top-left corner, as Wilcom and PE-Design files do */
+    let xx = ext[0], yy = ext[1], jumping = true, init = true, two = true;
     for (const c of cmds) {
       const dx = c[0] - xx, dy = c[1] - yy; xx = c[0]; yy = c[1];
       if (c[2] === STITCH) {
