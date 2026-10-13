@@ -110,15 +110,27 @@ ol, ul { list-style: none; margin: 0; padding: 0; }
 .fontBtn b { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fontBtn small { color: var(--muted); white-space: nowrap; }
 .swatches { display: flex; flex-wrap: wrap; gap: 6px; }
-.dlg { width: min(640px, calc(100% - 24px)); max-height: min(80vh, 720px); padding: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); }
+.dlg { width: min(680px, calc(100% - 24px)); max-height: min(90vh, 860px); padding: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); }
 .dlg[open] { display: flex; flex-direction: column; }
 .dlg::backdrop { background: rgba(10, 12, 18, .5); }
 .dlgHead { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px 0; }
+.dlgTip { flex: 1; margin-left: 12px; }
+@media (max-width: 520px) { .dlgTip { display: none; } }
 .dlgHead h2 { font-size: 15px; letter-spacing: 0; text-transform: none; color: var(--ink); }
 .dlgHead button { padding: 4px 10px; }
 .dlgFilters { display: grid; grid-template-columns: minmax(0, 1fr) 180px; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
 .dlgFilters input[type="search"] { background: var(--raise); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; min-width: 0; }
 .dlgFilters .chk { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; font-size: 13px; }
+.pv { padding: 10px 14px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 6px; }
+.pvHead { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.pvHead button { padding: 5px 12px; white-space: nowrap; }
+@media (max-width: 520px) { .pvWrap { height: 72px; } .pv .hint { font-size: 12px; } }
+.pvLbl { color: var(--muted); }
+.pvWrap { height: 96px; border-radius: 6px; background: #f3f1ec; border: 1px solid var(--line); }
+.pvWrap canvas { width: 100%; height: 100%; cursor: default; }
+#pvNote { min-height: 1.2em; }
+.fr4 { display: block; height: 30px; max-width: 100%; object-fit: contain; object-position: left center; margin: 4px 0 2px; padding: 3px 6px; background: #f3f1ec; border-radius: 4px; }
+.fontRow[aria-pressed="true"] { outline: 2px solid var(--accent); outline-offset: -2px; }
 .fontList { overflow-y: auto; flex: 1; min-height: 120px; padding: 6px; }
 .fontRow { display: flex; flex-direction: column; gap: 2px; width: 100%; text-align: left; background: none; border: 0; border-radius: 6px; padding: 8px; font-weight: 400; }
 .fontRow:hover { background: var(--raise); }
@@ -128,7 +140,7 @@ ol, ul { list-style: none; margin: 0; padding: 0; }
 .fr1 .num { color: var(--muted); white-space: nowrap; }
 .fr1 .num.fit { color: var(--accent); }
 .fr2 { color: var(--muted); font-size: 12.5px; }
-.fr3 { color: var(--muted); font-size: 12.5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.fr3 { color: var(--muted); font-size: 12.5px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
 #fontCount { padding: 8px 14px 12px; border-top: 1px solid var(--line); }
 @media (max-width: 520px) { .dlgFilters { grid-template-columns: minmax(0, 1fr); } }
 .credits summary { cursor: pointer; color: var(--muted); font-size: 12.5px; }
@@ -239,11 +251,16 @@ ol, ul { list-style: none; margin: 0; padding: 0; }
     </section>
   </main>
   <dialog id="fontDlg" class="dlg" aria-labelledby="fontDlgT">
-    <div class="dlgHead"><h2 id="fontDlgT">Choose a font</h2><button id="fontClose" type="button">Close</button></div>
+    <div class="dlgHead"><h2 id="fontDlgT">Choose a font</h2><span class="hint dlgTip">Click a font to preview your text, double-click to use it.</span><button id="fontClose" type="button">Close</button></div>
     <div class="dlgFilters">
       <input id="fontQ" type="search" aria-label="Search fonts">
       <select id="fontCat" aria-label="Font style"></select>
       <label class="chk" id="fontFitL"><input id="fontFit" type="checkbox"> Only fonts made for this letter height</label>
+    </div>
+    <div class="pv">
+      <div class="pvHead"><span><span class="pvLbl">Your text in</span> <b id="pvName"></b></span><button id="pvUse" type="button" class="primary">Use this font</button></div>
+      <div class="pvWrap" id="pvWrap"><canvas id="pvCv"></canvas></div>
+      <p class="hint" id="pvNote"></p>
     </div>
     <ul id="fontList" class="fontList"></ul>
     <p class="hint" id="fontCount"></p>
@@ -10186,11 +10203,56 @@ const Exporter = (() => {
   const dlg = $('fontDlg'); let pickFor = null;
   for (const [v, l] of FONT_CATS) { if (!v || FONTS.some(f => f.tags.includes(v))) $('fontCat').add(new Option(l, v)); }
   $('fontQ').placeholder = `Search ${FONTS.length} fonts`;
+  let pickId = null, pvSeq = 0;
+  /* draw stitch runs, fitted into a canvas, the way the main preview draws thread */
+  function paintRuns(canvas, groups, wCss, hCss, pad) {
+    const dpr = window.devicePixelRatio || 1, c = canvas.getContext('2d');
+    canvas.width = Math.round(wCss * dpr); canvas.height = Math.round(hCss * dpr);
+    c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, canvas.width, canvas.height);
+    const all = []; for (const g of groups) for (const r of g.runs) all.push(r);
+    if (!all.length) return;
+    const bb = Engine.bboxOf(all), bw = Math.max(bb[2] - bb[0], 0.1), bh = Math.max(bb[3] - bb[1], 0.1);
+    const k = Math.min((wCss - pad * 2) / bw, (hCss - pad * 2) / bh) * dpr;
+    const ox = (canvas.width - bw * k) / 2 - bb[0] * k, oy = (canvas.height - bh * k) / 2 - bb[1] * k;
+    c.lineCap = 'round'; c.lineJoin = 'round';
+    const lw = Math.max(0.7 * dpr, 0.38 * k);
+    for (const g of groups) {
+      const p = new Path2D();
+      for (const r of g.runs) { r.forEach((q, i) => i ? p.lineTo(q[0] * k + ox, q[1] * k + oy) : p.moveTo(q[0] * k + ox, q[1] * k + oy)); }
+      c.strokeStyle = shade(g.color); c.lineWidth = lw; c.stroke(p);
+      c.strokeStyle = g.color; c.lineWidth = lw * 0.62; c.stroke(p);
+    }
+  }
+  /* the text being edited, stitched in the font under consideration */
+  function previewFont(id) {
+    const t = pickFor; if (!t) return;
+    pickId = id; const f = FONT_BY_ID.get(id), seq = ++pvSeq;
+    for (const b of $('fontList').querySelectorAll('.fontRow')) b.setAttribute('aria-pressed', String(b.dataset.id === id));
+    $('pvName').textContent = f.name; $('pvUse').disabled = false; $('pvUse').textContent = id === t.font ? 'Keep this font' : 'Use this font';
+    const show = () => {
+      if (seq !== pvSeq) return;
+      const font = st.fonts.get(id);
+      if (font === 'loading' || !font) { $('pvNote').textContent = 'Loading the font…'; setTimeout(show, 120); return; }
+      if (font === 'error') { $('pvNote').textContent = 'This font could not be loaded.'; return; }
+      const [lo, hi] = fontRange(f), h = Math.min(hi, Math.max(lo, t.height));
+      let r; try { r = TextStitch.render(font, { ...t, x: 0, y: 0, height: h }, S); } catch (e) { $('pvNote').textContent = 'This text could not be stitched in this font.'; return; }
+      const many = r.groups.length > 1, groups = r.groups.map(g => ({ runs: g.runs, color: many ? (g.c || t.color) : t.color }));
+      const box = $('pvWrap'); paintRuns($('pvCv'), groups, box.clientWidth, box.clientHeight, 10);
+      const notes = [];
+      if (h !== t.height) notes.push(`Shown at ${h.toFixed(1)} mm, the nearest size this font was made for.`);
+      if (r.missing.length) notes.push(`No stitches for: ${r.missing.join(' ')}`);
+      if (!groups.length) notes.push('None of these characters are in this font.');
+      $('pvNote').textContent = notes.join(' ');
+    };
+    ensureFont(id); show();
+  }
+  $('pvUse').addEventListener('click', () => { const t = pickFor, id = pickId; closeFonts(); if (t && id && id !== t.font) setFont(t, id); });
   function openFonts(t) {
     pickFor = t; $('fontQ').value = ''; $('fontFitL').lastChild.textContent = ` Only fonts made for ${t.height} mm letters`;
-    listFonts();
+    pickId = t.font; listFonts();
     if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
     const cur = $('fontList').querySelector('[aria-current="true"]'); if (cur) cur.scrollIntoView({ block: 'center' });
+    previewFont(t.font);
   }
   function closeFonts() { if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); }
   function listFonts() {
@@ -10203,7 +10265,7 @@ const Exporter = (() => {
       if (fitOnly && !fits) continue;
       if (q && !(f.name + ' ' + f.tags.join(' ') + ' ' + (f.desc || '')).toLowerCase().includes(q)) continue;
       n++;
-      const li = document.createElement('li'), b = document.createElement('button'); b.type = 'button'; b.className = 'fontRow';
+      const li = document.createElement('li'), b = document.createElement('button'); b.type = 'button'; b.className = 'fontRow'; b.dataset.id = f.id;
       if (f.id === t.font) b.setAttribute('aria-current', 'true');
       const head = document.createElement('span'); head.className = 'fr1';
       const nm = document.createElement('b'); nm.textContent = f.name;
@@ -10213,9 +10275,14 @@ const Exporter = (() => {
       const labels = f.tags.filter(k => CAT_NAME[k] && k !== 'tiny').map(k => CAT_NAME[k]);
       if (f.glyphs < 60) labels.push(`${f.glyphs} characters`);
       tags.textContent = labels.join(' · ');
-      b.append(head, tags);
+      /* a stitched sample of every font, drawn ahead of time so the list needs no font data */
+      const im = document.createElement('img'); im.className = 'fr4'; im.alt = ''; im.loading = 'lazy'; im.decoding = 'async'; im.src = 'previews/' + f.id + '.png';
+      im.onerror = () => im.remove();
+      b.append(head, im, tags);
       if (f.desc) { const d = document.createElement('span'); d.className = 'fr3'; d.textContent = f.desc; b.appendChild(d); }
-      b.addEventListener('click', () => { closeFonts(); setFont(t, f.id); });
+      if (f.id === pickId) b.setAttribute('aria-pressed', 'true');
+      b.addEventListener('click', () => previewFont(f.id));
+      b.addEventListener('dblclick', () => { closeFonts(); setFont(t, f.id); });
       li.appendChild(b); ul.appendChild(li);
     }
     $('fontCount').textContent = n ? `${n} of ${FONTS.length} fonts. Sizes are the letter heights each font was digitized for.` : 'No fonts match. Clear the search or the filters.';
@@ -10400,7 +10467,7 @@ const Exporter = (() => {
     clearTimeout(newArmed); newArmed = 0; b.textContent = 'New';
     st.named = false; st.texts = []; st.bg.shape = 'none'; st.bg.sizing = 'fit'; syncBg(); renderTexts(); renderCredits(); removeArt();
   });
-  window.__np = { st, S, load, generate, addText, renderTexts, ensureFont, setFont, FONTS };
+  window.__np = { st, S, load, generate, addText, renderTexts, ensureFont, setFont, FONTS, paintRuns };
   syncFile(); queue(0);
 })();
 
