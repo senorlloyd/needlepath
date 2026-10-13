@@ -104,6 +104,7 @@ ol, ul { list-style: none; margin: 0; padding: 0; }
 .trow textarea { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; resize: vertical; width: 100%; }
 .trow input[type="range"] { accent-color: var(--accent); width: 100%; }
 .trow input[type="color"] { width: 44px; height: 28px; padding: 0; border: 1px solid var(--line); border-radius: 4px; background: none; }
+.fitBg { padding: 5px 10px; font-size: 12.5px; justify-self: start; align-self: flex-start; }
 .txt .chk { display: flex; align-items: flex-start; gap: 6px; font-size: 12.5px; }
 .txt .rm { justify-self: start; padding: 4px 10px; font-size: 12.5px; }
 .fontBtn { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; width: 100%; text-align: left; background: var(--panel); color: var(--ink); padding: 6px 8px; }
@@ -170,8 +171,9 @@ ol, ul { list-style: none; margin: 0; padding: 0; }
     <div class="brand"><h1><svg class="logo" viewBox="0 0 360 75.84" role="img" aria-label="NeedlePath"><path class="lp" d="M239.79,56.23v13.38s-.38.41-.41.41h-9.66s-.41-.38-.41-.41V22.71s.38-.41.41-.41h24.01c.49,0,2.73.58,3.39.75,17.59,4.67,15.74,28.59-1.32,32.5-5.21,1.2-10.7.5-16.01.69ZM239.79,47.13h12.28c1.39,0,4.36-1.89,5.25-3.03,2.48-3.17,2.06-8.96-1.43-11.27-.4-.26-3-1.43-3.27-1.43h-12.83v15.73Z"/> <path class="lk" d="M165.43,70.03c-.73-.23-.31-2.63-.42-3.31-4.93,4.9-12.09,5.18-18.02,1.88-8.9-4.96-10.78-17.05-5.22-25.26,5.19-7.67,16.83-9.34,23.24-2.28v-21.11s.38-.41.41-.41h9.11s.41.38.41.41v49.67s-.38.41-.41.41h-9.11ZM165.25,53.68c0-4.65-3.77-8.41-8.41-8.41s-8.41,3.77-8.41,8.41,3.77,8.41,8.41,8.41,8.41-3.77,8.41-8.41Z"/> <path class="lp" d="M336.1,41.06l2.51-2.04c9.25-5.35,20.35-1.58,21.22,9.91.5,6.59-.25,13.93-.14,20.55-.06.13-.5.56-.55.56h-9.38s-.41-.38-.41-.41v-18.49c0-1.41-1.2-3.43-2.35-4.28-3.1-2.27-8.02-1.07-9.97,2.17-.18.3-.93,1.95-.93,2.11v18.49s-.38.41-.41.41h-9.38s-.41-.38-.41-.41V24.09s.43-.49.56-.55c.56-.26,8.54-.26,9.1,0,.13.06.56.5.56.55v16.97Z"/> <path class="lp" d="M290.43,70.31c-.68-.21-.34-2.13-.42-2.76-1.03.4-1.73,1.24-2.75,1.8-7.86,4.26-22.01,1.17-19.19-10.09,1.81-7.23,10.75-7.87,16.85-7.73.62.01,4.74.7,4.82.13.6-6.56-7.15-7-11.61-4.69-1.04.54-1.81,1.54-2.84,2.07-.36-.06-4.86-4.63-5.17-5.08-.4-.6-.11-.9.32-1.36,7.7-8.12,29.5-6.36,29.5,6.88v20.42s-.38.41-.41.41h-9.11ZM289.74,57.89c-3.14.02-9.87-1.39-11.65,2.02-1.04,2,.37,4.12,2.46,4.55,4.28.87,9.99-1.41,9.18-6.56Z"/> <path class="lp" d="M314.85,38.3h8.14s.41.38.41.41v7.17s-.38.41-.41.41h-8.14v13.66c0,.09.78,1.36.95,1.54.93.95,2.9.95,4.16.81.77-.08,2.33-.96,2.77-.29.24.36,1.08,6.79.91,7.28-.35,1-5.85,1.81-6.99,1.83-6.19.16-11.21-2.26-11.74-8.96-.39-4.97.34-10.4-.03-15.42-.33-1.01-3.42-.09-4.06-.49-.4-.25-.51-6.74-.18-7.41.49-1.01,3.26-.38,4.28-.55v-6.48s.43-.49.56-.55c.48-.22,7.6-.29,8.41-.13.3.06.97.48.97.68v6.48Z"/> <path class="lk" d="M66.16,23.74c.3.3.32,1.01.35,1.44-.36,13.58.57,27.33-.28,40.85-.06.97.13,2.13,0,3.04-.05.36.15.49-.41.41-1.47-.22-9.53-5.67-9.79-7.05l-.02-37.26c.09-1.09.07-1.59,1.27-1.76,1.72-.24,5.66-.19,7.45-.04.43.04,1.14.05,1.44.35Z"/> <path class="lk" d="M101.82,55.96c.77-.58.6-2,.56-2.91-.87-23.16-36.35-21.17-34.22,2.49,1.39,15.45,23.13,20.33,31.87,8.98.58-.75,1.04-1.08.12-1.79-.67-.52-5.83-4.02-6.2-4.01-.63.02-1.97,1.85-2.63,2.32-4.46,3.14-12.71.97-13.23-4.81,3.19-.51,22.32.78,23.73-.28ZM92.16,49.89h-13.8c.94-7.23,13.23-7.63,13.8,0Z"/> <path class="lk" d="M137.02,49.87c-3.36-17.81-30.26-17.62-33.47.5-2.69,15.21,12.92,24.77,26.14,18.41,1.18-.57,5.76-3.95,6.04-5.02.13-.48-.1-.62-.38-.92-.3-.32-5.72-4.11-6.09-4.15-.81-.08-2.12,1.7-2.96,2.29-4.54,3.15-12.63,1.07-13.17-4.75h22.78c.65.11.69-.29.95-.55,1.07-1.07.45-4.23.15-5.81ZM127.21,49.89h-13.8c1.04-7.28,12.92-7.54,13.8,0Z"/> <path class="lk" d="M226.28,51.95c-1.67-22.02-36.89-19.96-34.15,4.35,1.6,14.16,21.06,18.9,30.52,9.71.81-.78,2.42-2.23,1.55-3.15-.31-.33-5.72-4.11-6.09-4.15-.81-.08-2.12,1.7-2.96,2.29-4.53,3.15-12.6,1.13-13.17-4.75l23.73-.28c.84-.5.64-3,.56-4.01ZM216.34,49.89h-14.07c1.18-7.4,12.78-7.48,14.07,0Z"/> <polygon class="lk" points="189.31 69.2 189.29 19.81 189.29 19.24 183.78 19.24 180.19 19.25 179.05 19.25 179.07 70.32 189.31 70.32 189.31 69.2"/> <g> <path class="lp" d="M8.82,12.63c1.38,0,2.78.1,4.14.28,15.06,1.9,20.83,18.41,27.27,29.99,10.03,18.01,16.53,25.12,36.38,31.8.43.14.79-.24.65.58-7.63.33-15.2-.4-21.98-4.09-13.57-7.37-19.61-23.64-26.81-36.38-4.07-7.21-7.61-13.22-15.78-16.1-1.88-.66-1.95-.55-3.86-.83-.5-.07-2.52-.36-2.64-.53v-4.45c.31-.44,1.99-.26,2.64-.26Z"/> <path class="lk" d="M12.96,12.91c-1.36-.17-2.76-.28-4.14-.28-.33-1.85.81-6.27-.85-7.29-1.3-.8-2.56-.07-3.16,1.2,0,5.82-.42,11.74-.14,17.55.05,1.1.17,2.78.31,3.84.28,2.03,3.53,2.15,3.84-.53.34-2.94-.27-6.51,0-9.53,1.92.28,1.98.17,3.86.83-.31,6.65-.61,13.35-1.11,20-.61,8.25-1.29,16.88-2.24,25.08-.2,1.72-1.25,11.34-2.16,11.92-1.55.99-2.01-3.84-2.17-4.75-1.59-9.08-1.82-18.39-2.8-27.55C2.32,31.36-.26,18.38.02,6.46.15,1.33,5.67-1.39,10.12.72s3.09,8.27,2.85,12.19Z"/> </g></svg></h1><span class="sub">Vector art to Stitch Files Beta</span></div>
     <div class="actions">
       <button id="newBtn" type="button">New</button>
-      <button id="openBtn" type="button">Open SVG</button>
-      <input id="fileIn" type="file" accept=".svg,image/svg+xml" hidden>
+      <button id="openBtn" type="button" title="Open an SVG or a saved Needlepath project">Open</button>
+      <button id="saveBtn" type="button" title="Save everything as a project file you can open again">Save project</button>
+      <input id="fileIn" type="file" accept=".svg,image/svg+xml,.json,application/json" hidden>
       <label class="nameField"><span>File name</span><input id="nameIn" type="text" maxlength="40" value="design" spellcheck="false" autocomplete="off"></label>
       <button id="exportBtn" type="button" class="primary">Export PES + DST</button>
     </div>
@@ -213,6 +215,7 @@ ol, ul { list-style: none; margin: 0; padding: 0; }
           <label class="wide"><input id="edgeRun" type="checkbox"> Edge-run underlay under fills</label>
           <label class="wide"><input id="turnOnFill" type="checkbox"> Turn a fill 90° when it sits on another fill</label>
           <label class="wide"><input id="centreOut" type="checkbox"> Sew from the centre of the design outward</label>
+          <label class="wide"><input id="textCut" type="checkbox"> Cut the bottom fill away under lettering that sits on two fills</label>
           <label class="wide"><input id="lighten" type="checkbox"> Lighten a fill that has another fill on top (25% more open)</label>
         </div>
       </details>
@@ -220,7 +223,7 @@ ol, ul { list-style: none; margin: 0; padding: 0; }
 
     <section class="stage" aria-label="Stitch preview">
       <div class="bar">
-        <button id="fitBtn" type="button">Fit</button><button id="zoomOut" type="button" aria-label="Zoom out">−</button><button id="zoomIn" type="button" aria-label="Zoom in">+</button>
+        <button id="undoBtn" type="button" title="Undo (Ctrl+Z)" disabled>Undo</button><button id="redoBtn" type="button" title="Redo (Ctrl+Shift+Z)" disabled>Redo</button><button id="fitBtn" type="button">Fit</button><button id="zoomOut" type="button" aria-label="Zoom out">−</button><button id="zoomIn" type="button" aria-label="Zoom in">+</button>
         <label><input id="showJumps" type="checkbox"> Jumps</label>
         <label><input id="showArt" type="checkbox"> Artwork</label>
         <span class="spacer"></span>
@@ -8788,6 +8791,13 @@ const Engine = (() => {
     const typeOf = (item, piece, key) => { const o = get(item.id); return !o.type || o.type === 'auto' ? autoType(analysisOf(key || item.id, piece, S, cache), S) : o.type; };
     /* 1. islands of every filled shape; an island is "substantial" if it would be a fill with its holes closed */
     const pre = items.map(item => {
+      /* a mask is lettering's footprint: it never stitches, it only counts as one more layer on top */
+      if (item.kind === 'mask') {
+        if (!clip) return null;
+        const parts = clip.split(item.rings, 'nonzero', null);
+        for (const p of parts) { bbOf(p); areaOf(p); p.item = item; p.outer = p; p.knocks = true; p.mask = true; }
+        return parts;
+      }
       if (item.kind !== 'fill') return null;
       const parts = clip ? clip.split(item.rings, item.rule, item.clip || null) : [{ rings: item.rings, rule: item.rule }];
       for (const p of parts) {
@@ -8806,7 +8816,7 @@ const Engine = (() => {
       if (!ks.length) return { pieces: [part], ids: [] };
       let pieces;
       if (layers >= 2) {
-        const hard = ks.filter(q => (extraHard && extraHard.has(q)) || clip.overlapArea(part, q) > 0.6 * part.area);
+        const hard = ks.filter(q => !q.mask && ((extraHard && extraHard.has(q)) || clip.overlapArea(part, q) > 0.6 * part.area));
         pieces = hard.length ? clip.minus(part, hard, 0, 1) : [part];
         pieces = pieces.flatMap(pc => clip.minus(pc, ks, 0, 2));
       } else pieces = clip.minus(part, ks, 0, 1);
@@ -8824,7 +8834,7 @@ const Engine = (() => {
     /* 2. find the narrow artwork (what will be satin or run stitch) once everything buried is removed */
     const details = [];
     if (layers) items.forEach((item, idx) => {
-      if (!pre[idx]) return;
+      if (!pre[idx] || item.kind === 'mask') return;
       for (const part of pre[idx]) for (const piece of cutPart(item, part, null).pieces) {
         const t = typeOf(item, piece);
         if (t === 'satin' || t === 'bean' || t === 'run') { bbOf(piece); areaOf(piece); details.push({ piece, item }); }
@@ -8833,7 +8843,7 @@ const Engine = (() => {
     /* fills that carry artwork already hold two layers of thread, so nothing is left underneath them */
     const carrying = new Set();
     if (layers >= 2) for (const parts of pre) if (parts) for (const q of parts) {
-      if (!q.knocks) continue;
+      if (!q.knocks || q.mask) continue;
       for (const d of details) if (d.item !== q.item && bbHit(d.piece.bb, q.bb, 0) && clip.overlapArea(d.piece, q.outer) > 0.3 * d.piece.area) { carrying.add(q); break; }
     }
     return items.map((item, idx) => {
@@ -8853,7 +8863,7 @@ const Engine = (() => {
               if (F && F.area > areaOf(piece) + 0.3 && autoType(analysisOf(item.id, F, S, cache), S) === 'fill') { piece = F; bbOf(piece); g.closed = true; }
             }
           }
-          const under = pre.some((ps, j) => ps && items[j].z > item.z && ps.some(q => q.knocks && bbHit(piece.bb, q.bb, -1)));
+          const under = pre.some((ps, j) => ps && items[j].z > item.z && ps.some(q => q.knocks && !q.mask && bbHit(piece.bb, q.bb, -1)));
           let onFill = false;
           if (clip) for (const lower of laid) if (bbHit(lower.bb, piece.bb, -0.5) && clip.overlapArea(piece, lower) > 0.5 * areaOf(piece)) { onFill = true; break; }
           g.pieces.push({ piece, under, onFill });
@@ -8870,6 +8880,7 @@ const Engine = (() => {
     if (!G) { G = geometry(); if (cache) cache.set(gkey, G); }
     return items.map((item, idx) => {
       const o = get(item.id);
+      if (item.kind === 'mask') return { type: 'skip', auto: 'skip', runs: [], note: '', angle: null, width: null, cutBy: [], hidden: false };
       if (item.kind !== 'fill') return { ...buildStroke(item, S, o), cutBy: [] };
       const g = G[idx], out = { type: 'skip', auto: 'skip', runs: [], note: '', angle: null, width: null, cutBy: g.cutBy, hidden: false };
       let best = -1;
@@ -9080,7 +9091,17 @@ const Clip = (() => {
     if (!ready()) return null;
     return L.Clipper.CleanPolygons(offset(toP(part.rings), -d), 0.02 * SC).filter(p => p.length > 2 && Math.abs(L.Clipper.Area(p)) / (SC * SC) > 1.5).map(fromP);
   }
-  return { ready, split, minus, overlapArea, closeOver, growWithin, inset };
+  /* the area thread covers: every stitch drawn with half-width w, then opened by `open` so lone travel stitches drop out */
+  function coverArea(runs, w, open) {
+    if (!ready()) return [];
+    const co = new L.ClipperOffset(2, 0.03 * SC);
+    for (const r of runs) if (r.length > 1) co.AddPath(r.map(p => ({ X: Math.round(p[0] * SC), Y: Math.round(p[1] * SC) })), L.JoinType.jtRound, L.EndType.etOpenRound);
+    let out = new L.Paths(); co.Execute(out, w * SC);
+    out = bool(L.ClipType.ctUnion, out, null, L.PolyFillType.pftNonZero);
+    if (open) out = offset(offset(out, -open), open);
+    return L.Clipper.CleanPolygons(out, 0.01 * SC).filter(p => p.length > 2 && Math.abs(L.Clipper.Area(p)) / (SC * SC) > 0.3).map(fromP);
+  }
+  return { ready, split, minus, overlapArea, closeOver, growWithin, inset, coverArea };
 })();
 
 /* Lettering from pre-digitized embroidery fonts (Ink/Stitch format, converted to JSON).
@@ -9332,11 +9353,20 @@ const TextStitch = (() => {
       }
       if (!placed.length) { yLine += font.leading * s; continue; }
       const lastP = placed[placed.length - 1], W = lastP.x + lastP.g.w * s;
-      const arc = (t.arc || 0) * Math.PI / 180, R = Math.abs(arc) > 0.01 ? W / Math.abs(arc) : 0, up = arc > 0;
+      const mode = t.path || (t.arc ? 'arc' : 'line');
+      const arc = mode === 'arc' ? (t.arc || 0) * Math.PI / 180 : 0, R = Math.abs(arc) > 0.01 ? W / Math.abs(arc) : 0, up = arc > 0;
+      /* around a circle: (t.x, t.y) is the centre and t.radius the middle of the band the letters sit in.
+         Top text reads clockwise with letters pointing out; bottom text reads the other way, letters pointing in, so both read left to right. */
+      const circ = mode === 'top' || mode === 'bottom', top = mode === 'top';
+      const Rb = circ ? Math.max(1, (t.radius || 30) + (top ? -1 : 1) * t.height / 2) : 0;
       for (const { g, x: gx } of placed) {
         const cx = gx + g.w * s / 2 - W / 2;
         let place, rotDeg = 0;
-        if (R) {
+        if (circ) {
+          const th = (top ? 1 : -1) * cx / Rb, c = Math.cos(th), d = Math.sin(th), off = top ? -Rb : Rb;
+          rotDeg = th * 180 / Math.PI;
+          place = p => { const lx = p[0] - g.w * s / 2, ly = p[1] + yLine + off; return [lx * c - ly * d + t.x, lx * d + ly * c + t.y]; };
+        } else if (R) {
           const th = cx / R, sn = Math.sin(th), cs = Math.cos(th), rot = up ? th : -th, c = Math.cos(rot), d = Math.sin(rot);
           const ox = R * sn, oy = (up ? R * (1 - cs) : -R * (1 - cs)) + yLine;
           rotDeg = rot * 180 / Math.PI;
@@ -9790,7 +9820,7 @@ const Exporter = (() => {
   ];
   const TYPES = [['fill', 'Fill'], ['satin', 'Satin'], ['run', 'Run'], ['bean', 'Triple run'], ['skip', 'Skip']];
   const TYPE_NAME = Object.fromEntries(TYPES);
-  const S = { fillLen: 4, fillAngle: 20, runLen: 2, satinMax: 7, satinMin: 0.5, satinSplit: 7, maxStitch: 9, joinGap: 2.5, layers: 2, lighten: false, lapRows: 2, edgeRun: true, turnOnFill: true, centreOut: true, ...pick(PRESETS.polo) };
+  const S = { fillLen: 4, fillAngle: 20, runLen: 2, satinMax: 7, satinMin: 0.5, satinSplit: 7, maxStitch: 9, joinGap: 2.5, layers: 2, lighten: false, lapRows: 2, edgeRun: true, turnOnFill: true, centreOut: true, textCut: true, ...pick(PRESETS.polo) };
   function pick(p) { return { fillSpacing: p.fillSpacing, satinSpacing: p.satinSpacing, pullComp: p.pullComp, underlay: p.underlay }; }
   const st = { design: null, name: 'design', widthMM: 76, hoop: 'auto', overrides: new Map(), sel: null, analysis: new Map(), scaleKey: 0, scaledItems: null, bg: { shape: 'none', sizing: 'fit', w: 60, h: 40, margin: 4, fill: true, fillColor: '#f1efe9', border: true, borderWidth: 2.5, borderColor: '#65469c' }, texts: [], fonts: new Map(), textSeq: 1, textNotes: [], drag: null, objs: [], ordered: [], plan: null, warnings: [], view: { z: 4, x: 0, y: 0, fitted: false, user: false }, playN: null, playing: false };
   let downloads = null, runtime = !!(window.claude && window.claude.use);
@@ -9804,7 +9834,7 @@ const Exporter = (() => {
   const ADV = ['fillSpacing', 'satinSpacing', 'pullComp', 'fillLen', 'fillAngle', 'satinMax'];
   function syncControls() {
     for (const k of ADV) $(k).value = S[k];
-    $('underlay').value = S.underlay; $('layers').value = String(S.layers); $('lighten').checked = S.lighten; for (const k of ['edgeRun', 'turnOnFill', 'centreOut']) $(k).checked = S[k]; $('lapRows').value = S.lapRows;
+    $('underlay').value = S.underlay; $('layers').value = String(S.layers); $('lighten').checked = S.lighten; for (const k of ['edgeRun', 'turnOnFill', 'centreOut', 'textCut']) $(k).checked = S[k]; $('lapRows').value = S.lapRows;
     const p = PRESETS[presetSel.value];
     $('presetNote').textContent = p ? p.note : 'Your own stitch settings.';
   }
@@ -9824,7 +9854,7 @@ const Exporter = (() => {
   });
   $('layers').addEventListener('change', () => { S.layers = +$('layers').value; queue(); });
   $('lighten').addEventListener('change', () => { S.lighten = $('lighten').checked; queue(); });
-  for (const k of ['edgeRun', 'turnOnFill', 'centreOut']) $(k).addEventListener('change', () => { S[k] = $(k).checked; queue(); });
+  for (const k of ['edgeRun', 'turnOnFill', 'centreOut', 'textCut']) $(k).addEventListener('change', () => { S[k] = $(k).checked; queue(); });
   $('lapRows').addEventListener('change', () => { S.lapRows = +$('lapRows').value; queue(); });
   $('underlay').addEventListener('change', () => { S.underlay = $('underlay').value; presetSel.value = 'custom'; $('presetNote').textContent = 'Your own stitch settings.'; queue(); });
   $('widthIn').addEventListener('input', () => {
@@ -9838,7 +9868,7 @@ const Exporter = (() => {
     let d;
     try { d = SvgImport.importSvg(text, $('svgHost')); }
     catch (e) { showMessages([{ err: true, text: e.message }]); return; }
-    st.design = d; st.name = name.replace(/\.svg$/i, ''); st.fileName = name;
+    st.design = d; st.svgText = text; st.name = name.replace(/\.svg$/i, ''); st.fileName = name;
     st.overrides.clear(); st.analysis.clear(); st.scaledItems = null; st.sel = null; st.playN = null;
     let w = d.width;
     if (w > 355) w = 355; if (d.height * (w / d.width) > 195) w = 195 * d.width / d.height;
@@ -9856,7 +9886,7 @@ const Exporter = (() => {
     if (d) $('widthIn').value = (st.widthMM / 25.4).toFixed(2);
   }
   function removeArt() {
-    st.design = null; st.scaledItems = null; st.overrides.clear(); st.analysis.clear(); st.sel = null; st.name = 'design';
+    st.design = null; st.svgText = null; st.scaledItems = null; st.overrides.clear(); st.analysis.clear(); st.sel = null; st.name = 'design';
     st.view.fitted = false; st.view.user = false; syncFile(); queue(0);
   }
   $('removeArt').addEventListener('click', removeArt);
@@ -9866,7 +9896,8 @@ const Exporter = (() => {
   $('openBtn').addEventListener('click', () => $('fileIn').click());
   $('fileIn').addEventListener('change', e => { const f = e.target.files[0]; if (f) readFile(f); e.target.value = ''; });
   function readFile(f) {
-    if (!/\.svg$/i.test(f.name) && f.type !== 'image/svg+xml') { showMessages([{ err: true, text: `${f.name} is not an SVG. Export your artwork as SVG with text converted to outlines.` }]); return; }
+    if (/\.json$/i.test(f.name)) { const r = new FileReader(); r.onload = () => openProject(String(r.result), f.name); r.onerror = () => showMessages([{ err: true, text: 'That file could not be read.' }]); r.readAsText(f); return; }
+    if (!/\.svg$/i.test(f.name) && f.type !== 'image/svg+xml') { showMessages([{ err: true, text: `${f.name} is not an SVG or a Needlepath project. Export your artwork as SVG with text converted to outlines.` }]); return; }
     const r = new FileReader(); r.onload = () => load(String(r.result), f.name); r.onerror = () => showMessages([{ err: true, text: 'That file could not be read.' }]); r.readAsText(f);
   }
   const wrap = $('wrap');
@@ -9876,7 +9907,75 @@ const Exporter = (() => {
 
   /* ---------- generation ---------- */
   let timer = 0;
-  function queue(ms) { clearTimeout(timer); $('busy').hidden = false; timer = setTimeout(generate, ms === undefined ? 180 : ms); }
+  function queue(ms) { clearTimeout(timer); $('busy').hidden = false; timer = setTimeout(generate, ms === undefined ? 180 : ms); clearTimeout(recT); recT = setTimeout(record, 450); }
+
+  /* ---------- design state: undo, redo, and project files ---------- */
+  const SET_KEYS = ['fillSpacing', 'satinSpacing', 'pullComp', 'underlay', 'fillLen', 'fillAngle', 'satinMax', 'satinSplit', 'layers', 'lighten', 'lapRows', 'edgeRun', 'turnOnFill', 'centreOut', 'textCut'];
+  function plain() {
+    return {
+      fileName: st.fileName || null, fileInfo: st.fileInfo || null, widthMM: st.widthMM, hoop: st.hoop,
+      overrides: [...st.overrides.entries()], bg: { ...st.bg }, preset: presetSel.value,
+      settings: Object.fromEntries(SET_KEYS.map(k => [k, S[k]])),
+      texts: st.texts.map(t => { const { groups, ...rest } = t; return { ...rest, path: t.path || (t.arc ? 'arc' : 'line'), colors: { ...(t.colors || {}) } }; })
+    };
+  }
+  function applyState(s, design, svgText) {
+    if (design !== st.design) { st.design = design; st.svgText = svgText || null; st.scaledItems = null; st.analysis.clear(); }
+    st.fileName = s.fileName; st.fileInfo = s.fileInfo; st.widthMM = s.widthMM || st.widthMM; st.hoop = s.hoop || 'auto';
+    st.overrides = new Map(s.overrides || []); const keep = { ...st.bg }; delete keep.cx; delete keep.cy; st.bg = { ...keep, ...s.bg };
+    Object.assign(S, s.settings || {}); presetSel.value = s.preset && (PRESETS[s.preset] || s.preset === 'custom') ? s.preset : 'custom';
+    st.texts = (s.texts || []).map(t => ({ ...t, colors: { ...(t.colors || {}) } }));
+    for (const t of st.texts) { const n = +String(t.id).slice(1); if (n >= st.textSeq) st.textSeq = n + 1; if (!FONT_BY_ID.has(t.font)) t.font = DEFAULT_FONT; ensureFont(t.font); }
+    if (st.sel && !st.texts.some(t => t.id === st.sel) && !(st.design && st.design.items.some(i => i.id === st.sel))) st.sel = null;
+    hoopSel.value = st.hoop; syncControls(); syncBg(); syncFile(); renderTexts(); renderCredits();
+    st.view.fitted = false; st.view.user = false; queue(0);
+  }
+  let hist = [], hi = -1, recT = 0;
+  function record() {
+    const s = { design: st.design, svgText: st.svgText, json: JSON.stringify(plain()) };
+    const cur = hist[hi];
+    if (cur && cur.json === s.json && cur.design === s.design) return;
+    hist = hist.slice(0, hi + 1); hist.push(s); if (hist.length > 100) hist.shift(); hi = hist.length - 1; syncUndo();
+  }
+  function syncUndo() { $('undoBtn').disabled = hi <= 0; $('redoBtn').disabled = hi >= hist.length - 1; }
+  function step(d) {
+    clearTimeout(recT); record();                    /* keep the latest edit before moving */
+    const n = hi + d; if (n < 0 || n >= hist.length) return;
+    hi = n; const s = hist[hi]; applyState(JSON.parse(s.json), s.design, s.svgText); syncUndo();
+  }
+  document.addEventListener('keydown', e => {
+    if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
+    const k = e.key.toLowerCase(), el = e.target;
+    if (k !== 'z' && k !== 'y') return;
+    if (el && (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && /^(text|search|number)$/.test(el.type)))) return;   /* typing keeps the field's own undo */
+    e.preventDefault(); step(k === 'y' || e.shiftKey ? 1 : -1);
+  });
+  const fileBase = () => ($('nameIn').value || st.name || 'design').replace(/[^A-Za-z0-9 _-]/g, '').trim().replace(/\s+/g, '-').slice(0, 40) || 'design';
+  async function saveProject() {
+    const data = JSON.stringify({ app: 'needlepath', version: 1, saved: new Date().toISOString(), name: $('nameIn').value, named: !!st.named, svg: st.svgText || null, ...plain() });
+    const filename = fileBase() + '.needlepath.json';
+    if (runtime) {
+      if (!downloads) { toast(downloads === null ? 'Still getting ready. Try again in a moment.' : 'Saving files is not available in this view.'); return; }
+      try { await downloads.save({ filename, data }); toast('Project saved. Open it again with the Open button.'); }
+      catch (e) { const c = e && e.code; toast(c === 'declined' ? 'Save cancelled.' : c === 'rate_limited' ? 'A save prompt is already open.' : 'The project could not be saved here (' + (c || 'unavailable') + ').'); }
+      return;
+    }
+    const el = document.createElement('a'); el.href = URL.createObjectURL(new Blob([data], { type: 'application/json' })); el.download = filename;
+    document.body.appendChild(el); el.click(); el.remove(); setTimeout(() => URL.revokeObjectURL(el.href), 4000);
+    toast('Saved ' + filename + '. Open it again with the Open button.');
+  }
+  function openProject(text, fname) {
+    let p;
+    try { p = JSON.parse(text); } catch (e) { p = null; }
+    if (!p || p.app !== 'needlepath') { showMessages([{ err: true, text: `${fname} is not a Needlepath project file.` }]); return; }
+    let d = null;
+    if (p.svg) { try { d = SvgImport.importSvg(p.svg, $('svgHost')); } catch (e) { showMessages([{ err: true, text: 'The artwork in this project could not be read: ' + e.message }]); return; } }
+    st.name = (p.name || fname.replace(/\.needlepath\.json$|\.json$/i, '')); st.named = !!p.named; $('nameIn').value = st.name;
+    applyState(p, d, p.svg); toast('Opened ' + fname + '.');
+  }
+  $('saveBtn').addEventListener('click', saveProject);
+  $('undoBtn').addEventListener('click', () => step(-1));
+  $('redoBtn').addEventListener('click', () => step(1));
   function scaled(item, k) {
     const sc = l => l.map(p => [p[0] * k, p[1] * k]);
     if (item.kind !== 'fill') return { ...item, paths: item.paths.map(p => ({ pts: sc(p.pts), closed: p.closed })), width: item.width * k };
@@ -9915,12 +10014,27 @@ const Exporter = (() => {
     const bgItems = backgroundItems(lists.length ? Engine.bboxOf(lists) : null, samples);
     const bgSig = JSON.stringify(bgItems.map(b => [b.color, b.rings.map(r => r.length), b.rings[0][0], b.rings[0][Math.floor(b.rings[0].length / 3)]]));
     const items = bgItems.concat(st.scaledItems);
+    /* lettering counts as a thread layer: where it would land on two stacked fills, the lower fill is cut away under it */
+    let maskSig = '';
+    if (S.layers >= 2 && S.textCut !== false && Clip.ready()) {
+      const fillBoxes = items.filter(it => it.kind === 'fill').map(it => Engine.bboxOf(it.rings));
+      const byText = new Map(); for (const o of textObjs) { if (!byText.has(o.textId)) byText.set(o.textId, []); for (const r of o.runs) byText.get(o.textId).push(r); }
+      for (const [id, runs] of byText) {
+        if (!runs.length) continue;
+        const bb = Engine.bboxOf(runs), hits = fillBoxes.filter(f => f[0] < bb[2] && f[2] > bb[0] && f[1] < bb[3] && f[3] > bb[1]).length;
+        if (hits < 2) continue;
+        const rings = Clip.coverArea(runs, 0.3, 0.35); if (!rings.length) continue;
+        items.push({ id: 'mask-' + id, kind: 'mask', z: 1e6, name: 'Lettering footprint', rings, rule: 'nonzero' });
+        maskSig += id + ':' + bb.map(v => v.toFixed(2)).join(',') + ':' + runs.length + ';';
+      }
+    }
     let res;
-    try { res = Engine.buildAll(items, S, st.overrides, st.analysis, { layers: S.layers, lighten: S.lighten, overlap: 0.5, sig: bgSig }, Clip.ready() ? Clip : null); }
+    try { res = Engine.buildAll(items, S, st.overrides, st.analysis, { layers: S.layers, lighten: S.lighten, overlap: 0.5, sig: bgSig + maskSig }, Clip.ready() ? Clip : null); }
     catch (e) { showMessages([{ err: true, text: 'This design could not be stitched: ' + e.message }]); $('busy').hidden = true; return; }
-    st.objs = items.map((item, i) => {
+    st.objs = items.flatMap((item, i) => {
       const r = res[i];
-      return { id: item.id, name: item.name, kind: item.kind, color: item.color, z: item.z, type: r.type, auto: r.auto, runs: r.runs, note: r.note, angle: r.angle, width: r.width, cutBy: r.cutBy, hidden: !!r.hidden, stitches: r.runs.reduce((a, b) => a + b.length, 0) };
+      if (item.kind === 'mask') return [];
+      return { id: item.id, name: item.name, kind: item.kind, color: item.color, z: item.z, type: r.type, auto: r.auto, runs: r.runs, note: r.note, angle: r.angle, width: r.width, cutBy: r.cutBy.filter(c => !c.startsWith('mask-')), hidden: !!r.hidden, stitches: r.runs.reduce((a, b) => a + b.length, 0) };
     });
     for (const o of textObjs) st.objs.push(o);
     st.ordered = Engine.orderObjects(st.objs, S.layers > 0 && Clip.ready(), S.centreOut);
@@ -9957,11 +10071,12 @@ const Exporter = (() => {
     return p.map(v => [v[0] + cx, v[1] + cy]);
   }
   function backgroundItems(bb, pts) {
-    const g = st.bg; if (g.shape === 'none' || (!g.fill && !g.border)) return [];
+    const g = st.bg; st.bgGeom = null; if (g.shape === 'none' || (!g.fill && !g.border)) return [];
     const h = g.borderWidth / 2;
     if (g.sizing === 'fixed' || !bb) {
       /* a set size is the finished outside size, border included; with nothing to fit yet the same size is used */
-      const cx = bb ? (bb[0] + bb[2]) / 2 : 0, cy = bb ? (bb[1] + bb[3]) / 2 : 0, e = g.border ? h : 0;
+      /* a set-size shape stays where it was put (pinned), so text fitted inside it does not chase it around */
+      const pin = typeof g.cx === 'number', cx = pin ? g.cx : bb ? (bb[0] + bb[2]) / 2 : 0, cy = pin ? g.cy : bb ? (bb[1] + bb[3]) / 2 : 0, e = g.border ? h : 0;
       return bgPieces(cx, cy, Math.max(2, g.w / 2 - e), Math.max(2, g.h / 2 - e));
     }
     const cx = (bb[0] + bb[2]) / 2, cy = (bb[1] + bb[3]) / 2;
@@ -9973,6 +10088,7 @@ const Exporter = (() => {
   }
   function bgPieces(cx, cy, a, b) {
     const g = st.bg, h = g.borderWidth / 2, out = [];
+    st.bgGeom = { cx, cy, a, b, inner: Math.min(a, b) - (g.border ? h : 0), outerW: 2 * (a + (g.border ? h : 0)), outerH: 2 * (b + (g.border ? h : 0)) };
     if (g.fill) out.push({ id: 'bgfill', z: -2, name: 'Background', kind: 'fill', color: g.fillColor, rings: [bgShape(g.shape, cx, cy, a, b)], rule: 'nonzero', clip: null });
     if (g.border) out.push({ id: 'bgborder', z: -1, name: 'Background border', kind: 'fill', color: g.borderColor, rings: [bgShape(g.shape, cx, cy, a + h, b + h), bgShape(g.shape, cx, cy, Math.max(0.5, a - h), Math.max(0.5, b - h))], rule: 'evenodd', clip: null });
     return out;
@@ -9989,7 +10105,11 @@ const Exporter = (() => {
   /* a background added to an empty design has nothing to fit around, so it starts at a set size */
   const startBg = shape => { if (st.bg.shape === 'none' && shape !== 'none' && !st.design && !st.texts.length) st.bg.sizing = 'fixed'; st.bg.shape = shape; st.view.fitted = false; st.view.user = false; syncBg(); queue(0); };
   bgSel.addEventListener('change', () => startBg(bgSel.value));
-  $('bgSizing').addEventListener('change', () => { st.bg.sizing = $('bgSizing').value; st.view.fitted = false; syncBg(); queue(0); });
+  $('bgSizing').addEventListener('change', () => {
+    st.bg.sizing = $('bgSizing').value;
+    if (st.bg.sizing === 'fixed' && st.bgGeom) { st.bg.cx = st.bgGeom.cx; st.bg.cy = st.bgGeom.cy; } else { delete st.bg.cx; delete st.bg.cy; }
+    st.view.fitted = false; syncBg(); queue(0);
+  });
   for (const [id, key, kind] of [['bgW', 'w', 'num'], ['bgH', 'h', 'num'], ['bgMargin', 'margin', 'num'], ['bgBorderWidth', 'borderWidth', 'num'], ['bgFill', 'fill', 'chk'], ['bgBorder', 'border', 'chk'], ['bgFillColor', 'fillColor', 'col'], ['bgBorderColor', 'borderColor', 'col']]) {
     $(id).addEventListener(kind === 'chk' ? 'change' : 'input', () => {
       const el = $(id);
@@ -10145,6 +10265,22 @@ const Exporter = (() => {
     if (t.height < lo || t.height > hi) t.height = +Math.min(hi, Math.max(lo, t.height)).toFixed(1);
     ensureFont(id); renderTexts(); renderCredits(); select(t.id); queue(0);
   }
+  /* put circle text in the ring just inside the background's border; a background that was fitting around
+     the design is fixed at its current size first, so it does not grow around the text again */
+  function fitCircle(t, quiet) {
+    const g = st.bgGeom;
+    if (!g) {
+      if (!quiet) toast('Add a background shape first, then fit the text inside it.');
+      if (!t.radius) t.radius = 30;
+      return false;
+    }
+    if (st.bg.sizing === 'fit') { st.bg.sizing = 'fixed'; st.bg.w = Math.round(g.outerW); st.bg.h = Math.round(g.outerH); syncBg(); }
+    if (typeof st.bg.cx !== 'number') { st.bg.cx = g.cx; st.bg.cy = g.cy; }
+    t.x = +g.cx.toFixed(1); t.y = +g.cy.toFixed(1);
+    t.radius = Math.max(5, +(g.inner - 2 - t.height / 2).toFixed(1));
+    st.view.fitted = false;
+    return true;
+  }
   function renderTexts() {
     const ul = $('texts'); ul.innerHTML = '';
     $('textHint').hidden = st.texts.length > 0;
@@ -10162,12 +10298,30 @@ const Exporter = (() => {
       fwrap.append(mk('span', { textContent: 'Font' }), fb); li.appendChild(fwrap);
       const num = (label, key, min, max, step) => { const i = row(label, mk('input', { type: 'number', id: 't' + key[0] + key.slice(-1) + '-' + t.id, min, max, step, value: t[key] })); i.addEventListener('input', change(el => { const v = parseFloat(el.value); if (isFinite(v) && v >= min && v <= max) t[key] = v; })); return i; };
       num('Letter height, mm', 'height', 1, 300, 0.5).id = 'th-' + t.id;
-      const arc = row('Curve', mk('input', { type: 'range', id: 'ta-' + t.id, min: -180, max: 180, step: 5, value: t.arc }), true), arcOut = mk('output', { className: 'num' });
-      const arcText = () => { arcOut.textContent = t.arc === 0 ? 'straight' : `${Math.abs(t.arc)}° ${t.arc > 0 ? 'arch' : 'dip'}`; }; arcText(); arc.parentNode.appendChild(arcOut);
-      arc.addEventListener('input', change(el => { t.arc = +el.value; arcText(); }, 60));
+      if (!t.path) t.path = t.arc ? 'arc' : 'line';
+      const ps = mk('select', { id: 'tpa-' + t.id });
+      for (const [v, l] of [['line', 'Straight'], ['arc', 'Curve'], ['top', 'Around a circle, top'], ['bottom', 'Around a circle, bottom']]) ps.add(new Option(l, v));
+      ps.value = t.path; row('Path', ps, true);
+      const circ = t.path === 'top' || t.path === 'bottom';
+      ps.addEventListener('change', change(el => {
+        const was = t.path; t.path = el.value;
+        if ((t.path === 'top' || t.path === 'bottom') && !(was === 'top' || was === 'bottom')) fitCircle(t, true);
+        renderTexts();
+      }, 0));
+      if (t.path === 'arc') {
+        const arc = row('Curve', mk('input', { type: 'range', id: 'ta-' + t.id, min: -180, max: 180, step: 5, value: t.arc }), true), arcOut = mk('output', { className: 'num' });
+        const arcText = () => { arcOut.textContent = t.arc === 0 ? 'straight' : `${Math.abs(t.arc)}° ${t.arc > 0 ? 'arch' : 'dip'}`; }; arcText(); arc.parentNode.appendChild(arcOut);
+        arc.addEventListener('input', change(el => { t.arc = +el.value; arcText(); }, 60));
+      }
+      if (circ) {
+        num('Circle radius, mm', 'radius', 5, 180, 0.5).id = 'tr-' + t.id;
+        const fb = mk('button', { type: 'button', className: 'fitBg', textContent: 'Fit inside the background', id: 'tfb-' + t.id });
+        fb.addEventListener('click', () => { if (fitCircle(t, false)) { renderTexts(); select(t.id); queue(0); } });
+        const fw = mk('div', { className: 'trow wide' }); fw.appendChild(fb); li.appendChild(fw);
+      }
       num('Letter spacing, mm', 'spacing', -5, 30, 0.1).id = 'ts-' + t.id;
-      num('Across, mm', 'x', -200, 200, 0.5).id = 'txx-' + t.id;
-      num('Down, mm', 'y', -150, 150, 0.5).id = 'tyy-' + t.id;
+      num(circ ? 'Circle centre across, mm' : 'Across, mm', 'x', -200, 200, 0.5).id = 'txx-' + t.id;
+      num(circ ? 'Circle centre down, mm' : 'Down, mm', 'y', -150, 150, 0.5).id = 'tyy-' + t.id;
       const col = row('Thread', mk('input', { type: 'color', id: 'tc-' + t.id, value: t.color })); col.addEventListener('input', change(el => { t.color = el.value; }));
       col.parentNode.id = 'tcw-' + t.id;
       /* a multicolour font sews in steps, each with its own thread; the swatches are filled in once the text is stitched */
@@ -10436,7 +10590,7 @@ const Exporter = (() => {
   if (runtime) window.claude.use('downloads').then(d => { downloads = d || false; if (st.plan) refreshStats(); if (!d) toast('Saving files is not available in this view. Open the page from your Claude artifacts to export.'); });
   $('exportBtn').addEventListener('click', async () => {
     const p = st.plan; if (!p || !p.count) return;
-    const base = ($('nameIn').value || st.name || 'design').replace(/[^A-Za-z0-9 _-]/g, '').trim().replace(/\s+/g, '-').slice(0, 40) || 'design';
+    const base = fileBase();
     let pes, dst;
     try { pes = Exporter.pes(p, base); dst = Exporter.dst(p, base); } catch (e) { toast('The stitch files could not be written: ' + e.message); return; }
     if (runtime) {
@@ -10465,7 +10619,7 @@ const Exporter = (() => {
     if (isEmpty()) return;
     if (!newArmed) { b.textContent = 'Clear everything?'; newArmed = setTimeout(() => { newArmed = 0; b.textContent = 'New'; }, 4000); return; }
     clearTimeout(newArmed); newArmed = 0; b.textContent = 'New';
-    st.named = false; st.texts = []; st.bg.shape = 'none'; st.bg.sizing = 'fit'; syncBg(); renderTexts(); renderCredits(); removeArt();
+    st.named = false; st.texts = []; st.bg.shape = 'none'; st.bg.sizing = 'fit'; delete st.bg.cx; delete st.bg.cy; syncBg(); renderTexts(); renderCredits(); removeArt();
   });
   window.__np = { st, S, load, generate, addText, renderTexts, ensureFont, setFont, FONTS, paintRuns };
   syncFile(); queue(0);
