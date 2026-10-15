@@ -8944,7 +8944,23 @@ const Engine = (() => {
         let lowest = null; for (const o of left) if (!lowest || o.z < lowest.z) lowest = o; avail.add(lowest);
       }
       let cands = [...avail].filter(o => o.color === color);
-      if (!cands.length) { let lowest = null; for (const o of avail) if (!lowest || o.z < lowest.z) lowest = o; color = lowest.color; cands = [...avail].filter(o => o.color === color); }
+      if (!cands.length) {
+        /* choose the next thread so it can finish everywhere it is needed: a colour that would have to come back later
+           costs an extra colour change (and on the machine, possibly a stop). Look ahead by sewing only that colour. */
+        const left0 = c => { let k = 0; for (const o of left) if (o.color === c) k++; return k; };
+        const reach = c => {
+          const p2 = new Map(), q = [...avail].filter(o => o.color === c); let done = 0;
+          while (q.length) { const o = q.pop(); done++; for (const s of succ.get(o)) { if (!left.has(s)) continue; const v = (p2.has(s) ? p2.get(s) : pred.get(s)) - 1; p2.set(s, v); if (v === 0 && s.color === c) q.push(s); } }
+          return done;
+        };
+        let pick = null, pickKey = null;
+        for (const c of new Set([...avail].map(o => o.color))) {
+          const stuck = left0(c) - reach(c); let lowest = Infinity; for (const o of avail) if (o.color === c && o.z < lowest) lowest = o.z;
+          const key = [stuck > 0 ? 1 : 0, lowest];
+          if (!pickKey || key[0] < pickKey[0] || (key[0] === pickKey[0] && key[1] < pickKey[1])) { pick = c; pickKey = key; }
+        }
+        color = pick; cands = [...avail].filter(o => o.color === color);
+      }
       /* work from the middle of the design outward, so fabric is pushed toward the frame instead of bunching */
       let best = cands[0], bd = Infinity;
       for (const o of cands) {
@@ -8957,18 +8973,22 @@ const Engine = (() => {
     }
     return out;
   }
+  /* Lock stitches: a few short stitches that walk along the first and last segment, each landing in a fresh hole
+     (alternately a hair to either side of the line). Going back into the same hole can pull the stitch out, which
+     right after a trim leaves the thread loose and trips the machine's thread sensor. */
   function withLocks(run) {
-    if (run.length < 2) return run;
-    const a = run[0], b = run[1], d = dist(a, b) || 1, k = Math.min(0.7, d / 2) / d;
-    const la = [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k];
-    const n = run.length, y = run[n - 1], x = run[n - 2], e = dist(x, y) || 1, m = Math.min(0.7, e / 2) / e;
-    const lb = [y[0] + (x[0] - y[0]) * m, y[1] + (x[1] - y[1]) * m];
-    return [a, la, a].concat(run.slice(1), [lb, y]);
+    if (run.length < 2) return Object.assign(run.slice(), { nIn: 0, nOut: 0 });
+    const along = (p, q, t, side) => { const d = dist(p, q) || 1, ux = (q[0] - p[0]) / d, uy = (q[1] - p[1]) / d; return [p[0] + ux * t - uy * side, p[1] + uy * t + ux * side]; };
+    const a = run[0], b = run[1], s1 = Math.min(1, dist(a, b) / 1.3), off = 0.12;
+    const tin = [along(a, b, 0.7 * s1, off), along(a, b, 0.3 * s1, -off), along(a, b, 0.6 * s1, 0)];
+    const n = run.length, y = run[n - 1], x = run[n - 2], s2 = Math.min(1, dist(x, y) / 1.3);
+    const tout = [along(y, x, 0.6 * s2, off), along(y, x, 0.15 * s2, -off), along(y, x, 0.5 * s2, off), y];
+    return Object.assign([a].concat(tin, run.slice(1, -1), [y], tout), { nIn: tin.length + 1, nOut: tout.length });
   }
   /* Final needle sequence: [x, y, flag, objectIndex]. A JUMP means trim, then move. */
   function assemble(ordered, S) {
     const st = []; let pos = null, color = null; const blocks = [];
-    let trims = 0, cutBefore = false;
+    let trims = 0, cutBefore = false, tieStart = 0;
     ordered.forEach((o, oi) => {
       const paths = [], gap = o.joinGap || S.joinGap;
       for (const run of o.runs) {
@@ -8985,19 +9005,24 @@ const Engine = (() => {
         const joined = pos && !colorChange && !cutBefore && dist(pos, path[0]) <= S.joinGap && st.length && st[st.length - 1][2] === STITCH;
         let pts;
         if (joined) { /* continue the thread: drop the previous tie-off, no trim */
-          st.length -= 2; pts = withLocks(path).slice(3); pts.unshift(path[0]);
+          st.length = tieStart; const L = withLocks(path); pts = L.slice(L.nIn); pts.unshift(path[0]); pts.nOut = L.nOut;
         } else {
           pts = withLocks(path);
           st.push([pts[0][0], pts[0][1], JUMP, oi]); if (pos) trims++;
         }
-        let prev = joined ? st[st.length - 1] : null;
-        for (const p of pts) {
+        /* the jump lands where the first stitch goes, so sewing starts with the lock stitches, not a second needle drop in the same spot */
+        let prev = st[st.length - 1];
+        const skipFirst = !joined;
+        for (let pi = 0; pi < pts.length; pi++) {
+          const p = pts[pi];
+          if (pi === 0 && skipFirst) { if (pi === pts.length - (pts.nOut || 0) - 1) tieStart = st.length; continue; }
           if (prev) {
             const d = Math.hypot(p[0] - prev[0], p[1] - prev[1]);
             if (d > S.maxStitch) { const n = Math.ceil(d / S.maxStitch); for (let k = 1; k < n; k++) st.push([prev[0] + (p[0] - prev[0]) * k / n, prev[1] + (p[1] - prev[1]) * k / n, STITCH, oi]); }
           }
-          if (prev && p !== pts[pts.length - 1] && Math.hypot(p[0] - prev[0], p[1] - prev[1]) < 0.3) continue;   /* no stitches too short for the needle */
+          if (prev && p !== pts[pts.length - 1] && Math.hypot(p[0] - prev[0], p[1] - prev[1]) < 0.3) { if (pi === pts.length - (pts.nOut || 0) - 1) tieStart = st.length; continue; }   /* no stitches too short for the needle */
           const e = [p[0], p[1], STITCH, oi]; st.push(e); prev = e;
+          if (pi === pts.length - (pts.nOut || 0) - 1) tieStart = st.length;
         }
         pos = pts[pts.length - 1]; cutBefore = !!path.cut;
       });
@@ -9629,8 +9654,9 @@ const Exporter = (() => {
     for (const h of hexes) {
       if (map.has(h)) continue;
       const [r, g, b] = rgb(h); let best = 1, bd = Infinity;
-      for (let i = 1; i <= 64; i++) {
-        if (used.has(i) && used.size < 64) continue;
+      /* 62-64 are not thread colours on the machine: it treats them as appliqué steps and stops there for fabric */
+      for (let i = 1; i <= 61; i++) {
+        if (used.has(i) && used.size < 61) continue;
         const p = PEC[i], rm = (r + p[0]) / 2, dr = r - p[0], dg = g - p[1], db = b - p[2];
         const d = (2 + rm / 256) * dr * dr + 4 * dg * dg + (2 + (255 - rm) / 256) * db * db;
         if (d < bd) { bd = d; best = i; }
@@ -9773,7 +9799,7 @@ const Exporter = (() => {
     for (const c of cmds) {
       const dx = c[0] - xx, dy = c[1] - yy; xx = c[0]; yy = c[1];
       if (c[2] === STITCH) {
-        if (jumping) { if (dx !== 0 && dy !== 0) B.u8(0).u8(0); jumping = false; }
+        jumping = false;   /* no extra zero-length stitch after a move: the next stitch is the first needle drop, as in Wilcom's files */
         pecValue(B, dx, false); pecValue(B, dy, false);
       } else if (c[2] === JUMP) {
         jumping = true; const flag = init ? 0x10 : 0x20;
