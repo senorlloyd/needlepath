@@ -243,6 +243,7 @@ ol, ul { list-style: none; margin: 0; padding: 0; }
           <label class="wide"><input id="turnOnFill" type="checkbox"> Turn a fill 90° when it sits on another fill</label>
           <label class="wide"><input id="centreOut" type="checkbox"> Sew from the centre of the design outward</label>
           <label class="wide"><input id="textCut" type="checkbox"> Cut the bottom fill away under lettering that sits on two fills</label>
+          <label class="wide"><input id="backing" type="checkbox"> Sew a wide shape solid behind the artwork that sits in its holes (backing fill)</label>
           <label class="wide"><input id="lighten" type="checkbox"> Lighten a fill that has another fill on top (25% more open)</label>
         </div>
       </details>
@@ -8842,7 +8843,7 @@ const Engine = (() => {
   function satinFromShape(rings, rule, A, S, opts) {
     zigzag.tris = [];
     const runs0 = satinFromShape0(rings, rule, A, S, opts), tris = zigzag.tris; zigzag.tris = null;
-    if (!S.patchGaps || !tris.length) return runs0;
+    if (S.patchGaps === false || !tris.length) return runs0;
     return patchGaps(rings, rule, tris, S).concat(runs0);
   }
   function satinFromShape0(rings, rule, A, S, opts) {
@@ -8980,6 +8981,50 @@ const Engine = (() => {
      Layering follows hand-digitizing practice: fills go down first and narrow artwork (satin, run) is sewn on top
      of them, so a fill is not broken up by the detail that sits on it. A fill is cut away only where it would be
      buried: under a fill that covers most of it, under a fill that already carries detail, or where two fills stack. */
+  /* Backing fills. A wide shape with the rest of the artwork sitting in its holes (the coloured area around traced
+     lettering, say) is sewn solid under everything instead of as a lace of satin around each hole: its holes are closed
+     and it goes down first. An outline ring around one big hole stays as it is, so borders keep their satin edge. */
+  function backings(items, S, overrides, cache, clip) {
+    if (!clip || S.backing === false || (S.layers || 0) < 2) return items;
+    const fills = items.filter(i => i.kind === 'fill');
+    const key = 'backing|' + S.satinMax + '|' + items.map(i => i.id + ':' + ((overrides && overrides.get(i.id)) || {}).type + ':' + (i.kind === 'fill' ? i.rings.length + ',' + Math.round(ringsArea(i.rings) * 10) + ',' + i.rings[0][0].map(v => Math.round(v * 100)).join(',') : '')).join(';');
+    let res = cache && cache.get(key);
+    if (!res) {
+      res = new Map();
+      for (const item of fills) {
+        const ov = (overrides && overrides.get(item.id)) || {};
+        if (ov.type && ov.type !== 'auto') continue;
+        const parts = clip.split(item.rings, item.rule, item.clip || null), keep = [];
+        let changed = false, low = item.z;
+        for (const part of parts) {
+          const outer = { rings: [part.rings[0]], rule: 'nonzero' }, oa = ringsArea(outer.rings);
+          const holes = part.rings.slice(1), ha = holes.reduce((a, r) => a + ringsArea([r]), 0);
+          /* a band thinner than about 2.5 mm is an outline: it keeps its satin edge */
+          let ok = holes.length && ha > 0.12 * oa && oa > 40;
+          if (ok) ok = analysisOf(item.id + '~band' + keep.length, part, S, cache).meanW >= 2.5;
+          if (ok) ok = autoType(analysisOf(item.id + '~bk' + keep.length, outer, S, cache), S) === 'fill';
+          let cov = [];
+          if (ok) {
+            const hb = bboxOf(holes);
+            /* only what sits inside this shape's outline counts: a larger shape behind it (a background) does not */
+            cov = fills.filter(o => o !== item && bbHit(bboxOf(o.rings), hb, 0)).filter(o => {
+              const solid = { rings: clip.split(o.rings, o.rule, null).map(q => q.rings[0]), rule: 'nonzero' };
+              return solid.rings.length && clip.overlapArea(solid, outer) > 0.8 * ringsArea(solid.rings);
+            });
+            const hs = { rings: holes, rule: 'evenodd' };
+            const left = clip.minus(hs, cov.map(o => ({ rings: o.rings, rule: o.rule })), 0, 1).reduce((a, q) => a + ringsArea([q.rings[0]]) - ringsArea(q.rings.slice(1)), 0);
+            ok = left < 0.1 * ha;
+          }
+          if (ok) { keep.push(outer); changed = true; for (const o of cov) if (clip.overlapArea({ rings: holes, rule: 'evenodd' }, { rings: o.rings, rule: o.rule }) > 0.05) low = Math.min(low, o.z); }
+          else keep.push(part);
+        }
+        if (changed) res.set(item.id, { rings: keep.flatMap(k => k.rings), rule: 'evenodd', z: low < item.z ? low - 0.01 : item.z });
+      }
+      if (cache) cache.set(key, res);
+    }
+    if (!res.size) return items;
+    return items.map(i => res.has(i.id) ? { ...i, ...res.get(i.id), backing: true } : i);
+  }
   function buildAll(items, S, overrides, cache, opts, clip) {
     const get = id => (overrides && overrides.get(id)) || {};
     const layers = opts && clip ? opts.layers : 0, overlap = (opts && opts.overlap) || 0.5;
@@ -9048,7 +9093,8 @@ const Engine = (() => {
       if (item.kind !== 'fill') return null;
       const g = { pieces: [], cutBy: [], cut: false, closed: false }, mine = [];
       for (const part of pre[idx]) {
-        const { pieces, ids } = cutPart(item, part, carrying);
+        /* a backing fill stays whole under single fills; only where two layers already stack on it is it cut away */
+        const { pieces, ids } = cutPart(item, part, item.backing ? null : carrying);
         if (pieces.reduce((s, p) => s + areaOf(p), 0) < part.area - 0.3) { g.cut = true; for (const id of ids) if (!g.cutBy.includes(id)) g.cutBy.push(id); }
         for (let piece of pieces) {
           bbOf(piece);
@@ -9078,7 +9124,29 @@ const Engine = (() => {
     return items.map((item, idx) => {
       const o = get(item.id);
       if (item.kind === 'mask') return { type: 'skip', auto: 'skip', runs: [], note: '', angle: null, width: null, cutBy: [], hidden: false };
-      if (item.kind !== 'fill') return { ...buildStroke(item, S, o), cutBy: [] };
+      if (item.kind !== 'fill') {
+        /* an outline is hidden wherever a fill drawn after it covers it, just as it is on screen */
+        if (!clip || !clip.cutLines || item.kind !== 'stroke') return { ...buildStroke(item, S, o), cutBy: [] };
+        const sb = bboxOf(item.paths.map(p => p.pts)), m = item.width / 2;
+        const over = items.filter(q => q.kind === 'fill' && q.z > item.z && bbHit(bboxOf(q.rings), sb, m));
+        if (!over.length) return { ...buildStroke(item, S, o), cutBy: [] };
+        const paths = [];
+        for (const path of item.paths) {
+          const pts = path.closed ? path.pts.concat([path.pts[0]]) : path.pts;
+          let pieces = clip.cutLines([pts], over.map(q => ({ rings: q.rings, rule: q.rule })));
+          /* a closed outline cut open: rejoin the two pieces that meet at its starting point */
+          if (path.closed && pieces.length > 1) {
+            const st = pts[0], i = pieces.findIndex(q => dist(q[q.length - 1], st) < 0.02), j = pieces.findIndex(q => dist(q[0], st) < 0.02);
+            if (i >= 0 && j >= 0 && i !== j) { const joined = pieces[i].concat(pieces[j].slice(1)); pieces = pieces.filter((_, n) => n !== i && n !== j); pieces.push(joined); }
+          }
+          for (const q of pieces) if (polyLen(q) > Math.max(0.6, item.width)) paths.push({ pts: q, closed: false });
+        }
+        const r = buildStroke({ ...item, paths }, S, o);
+        const before = item.paths.reduce((a, p) => a + polyLen(p.closed ? p.pts.concat([p.pts[0]]) : p.pts), 0), after = paths.reduce((a, p) => a + polyLen(p.pts), 0);
+        const cutBy = after < before - 0.3 ? over.map(q => q.id) : [];
+        if (cutBy.length && !r.note) r.note = 'The part hidden under artwork drawn on top of it is left out.';
+        return { ...r, cutBy, hidden: !paths.length && !r.runs.length };
+      }
       const g = G[idx], out = { type: 'skip', auto: 'skip', runs: [], note: '', angle: null, width: null, cutBy: g.cutBy, hidden: false };
       let best = -1;
       for (const { piece, under, onFill } of g.pieces) {
@@ -9089,6 +9157,7 @@ const Engine = (() => {
         else if (best < 0) { out.auto = r.auto; out.width = r.width; }
       }
       if (!g.pieces.length && g.cut) { out.hidden = true; out.note = 'Completely covered by a fill above it, so it is not stitched.'; }
+      else if (!out.note && item.backing) out.note = 'Sewn solid underneath the artwork that sits in its gaps (a backing fill).';
       else if (!out.note) out.note = g.closed ? 'Sewn solid underneath the detail that sits on it.' : g.cut ? 'The part buried under the fill above it was removed.' : '';
       return out;
     });
@@ -9222,7 +9291,7 @@ const Engine = (() => {
     return { stitches: st, count, trims, blocks, bbox: count ? bb : [0, 0, 0, 0] };
   }
 
-  return { STITCH, JUMP, COLOR, END, inside, nearestOnBoundary, fillObject, buildAll, orderObjects, assemble, analyze, bboxOf, dist, runStitch, bean, sampler, resample, splitLong };
+  return { STITCH, JUMP, COLOR, END, backings, inside, nearestOnBoundary, fillObject, buildAll, orderObjects, assemble, analyze, bboxOf, dist, runStitch, bean, sampler, resample, splitLong };
 })();
 
 /* Polygon booleans via ClipperLib (optional). Splits shapes into islands and removes areas hidden under upper fills. */
@@ -9323,7 +9392,16 @@ const Clip = (() => {
     if (open) out = offset(offset(out, -open), open);
     return L.Clipper.CleanPolygons(out, 0.01 * SC).filter(p => p.length > 2 && Math.abs(L.Clipper.Area(p)) / (SC * SC) > 0.3).map(fromP);
   }
-  return { ready, split, minus, overlapArea, closeOver, growWithin, inset, coverArea };
+  /* the parts of open lines that lie outside the knockers (each {rings, rule}): a stroke hidden under a later fill */
+  function cutLines(lines, knockers) {
+    if (!ready() || !knockers.length) return lines;
+    let k = []; for (const q of knockers) for (const p of normalize(q.rings, q.rule)) k.push(p);
+    k = bool(L.ClipType.ctUnion, k, null, L.PolyFillType.pftNonZero);
+    const c = new L.Clipper(); c.AddPaths(toP(lines), L.PolyType.ptSubject, false); c.AddPaths(k, L.PolyType.ptClip, true);
+    const tree = new L.PolyTree(); c.Execute(L.ClipType.ctDifference, tree, L.PolyFillType.pftNonZero, L.PolyFillType.pftNonZero);
+    return L.Clipper.OpenPathsFromPolyTree(tree).map(fromP).filter(l => l.length > 1);
+  }
+  return { ready, split, minus, overlapArea, closeOver, growWithin, inset, coverArea, cutLines };
 })();
 
 /* NeedlePath lettering.
@@ -10116,7 +10194,7 @@ const Exporter = (() => {
   let weave = 'pique';
   const TYPES = [['fill', 'Fill'], ['satin', 'Satin'], ['run', 'Run'], ['bean', 'Triple run'], ['skip', 'Skip']];
   const TYPE_NAME = Object.fromEntries(TYPES);
-  const S = { fillLen: 4, fillAngle: 20, runLen: 2, satinMax: 7, satinMin: 0.5, satinSplit: 7, maxStitch: 9, joinGap: 2.5, layers: 2, lighten: false, lapRows: 2, edgeRun: true, turnOnFill: true, centreOut: true, textCut: true, ...pick(PRESETS.polo) };
+  const S = { fillLen: 4, fillAngle: 20, runLen: 2, satinMax: 7, satinMin: 0.5, satinSplit: 7, maxStitch: 9, joinGap: 2.5, layers: 2, lighten: false, lapRows: 2, edgeRun: true, turnOnFill: true, centreOut: true, textCut: true, backing: true, ...pick(PRESETS.polo) };
   function pick(p) { return { fillSpacing: p.fillSpacing, satinSpacing: p.satinSpacing, pullComp: p.pullComp, underlay: p.underlay }; }
   const st = { design: null, name: 'design', widthMM: 76, hoop: 'auto', overrides: new Map(), sel: null, analysis: new Map(), scaleKey: 0, scaledItems: null, bg: { shape: 'none', sizing: 'fit', w: 60, h: 40, margin: 4, fill: true, fillColor: '#f1efe9', border: true, borderWidth: 2.5, borderColor: '#65469c' }, texts: [], fonts: new Map(), textSeq: 1, textNotes: [], drag: null, objs: [], ordered: [], plan: null, warnings: [], view: { z: 4, x: 0, y: 0, fitted: false, user: false }, playN: null, playing: false };
   let downloads = null, runtime = !!(window.claude && window.claude.use);
@@ -10130,7 +10208,7 @@ const Exporter = (() => {
   const ADV = ['fillSpacing', 'satinSpacing', 'pullComp', 'fillLen', 'fillAngle', 'satinMax'];
   function syncControls() {
     for (const k of ADV) $(k).value = S[k];
-    $('underlay').value = S.underlay; $('layers').value = String(S.layers); $('lighten').checked = S.lighten; for (const k of ['edgeRun', 'turnOnFill', 'centreOut', 'textCut']) $(k).checked = S[k]; $('lapRows').value = S.lapRows;
+    $('underlay').value = S.underlay; $('layers').value = String(S.layers); $('lighten').checked = S.lighten; for (const k of ['edgeRun', 'turnOnFill', 'centreOut', 'textCut', 'backing']) $(k).checked = S[k] !== false; $('lapRows').value = S.lapRows;
     const p = PRESETS[presetSel.value];
     $('presetNote').textContent = p ? p.note : 'Your own stitch settings.';
     if (WEAVE[presetSel.value]) { weave = WEAVE[presetSel.value]; if (st.plan) draw(); }
@@ -10151,7 +10229,7 @@ const Exporter = (() => {
   });
   $('layers').addEventListener('change', () => { S.layers = +$('layers').value; queue(); });
   $('lighten').addEventListener('change', () => { S.lighten = $('lighten').checked; queue(); });
-  for (const k of ['edgeRun', 'turnOnFill', 'centreOut', 'textCut']) $(k).addEventListener('change', () => { S[k] = $(k).checked; queue(); });
+  for (const k of ['edgeRun', 'turnOnFill', 'centreOut', 'textCut', 'backing']) $(k).addEventListener('change', () => { S[k] = $(k).checked; queue(); });
   $('lapRows').addEventListener('change', () => { S.lapRows = +$('lapRows').value; queue(); });
   $('underlay').addEventListener('change', () => { S.underlay = $('underlay').value; presetSel.value = 'custom'; $('presetNote').textContent = 'Your own stitch settings.'; queue(); });
   $('widthIn').addEventListener('input', () => {
@@ -10207,7 +10285,7 @@ const Exporter = (() => {
   function queue(ms) { clearTimeout(timer); $('busy').hidden = false; timer = setTimeout(generate, ms === undefined ? 180 : ms); clearTimeout(recT); recT = setTimeout(record, 450); }
 
   /* ---------- design state: undo, redo, and project files ---------- */
-  const SET_KEYS = ['fillSpacing', 'satinSpacing', 'pullComp', 'underlay', 'fillLen', 'fillAngle', 'satinMax', 'satinSplit', 'layers', 'lighten', 'lapRows', 'edgeRun', 'turnOnFill', 'centreOut', 'textCut'];
+  const SET_KEYS = ['fillSpacing', 'satinSpacing', 'pullComp', 'underlay', 'fillLen', 'fillAngle', 'satinMax', 'satinSplit', 'layers', 'lighten', 'lapRows', 'edgeRun', 'turnOnFill', 'centreOut', 'textCut', 'backing'];
   function plain() {
     return {
       fileName: st.fileName || null, fileInfo: st.fileInfo || null, widthMM: st.widthMM, hoop: st.hoop,
@@ -10312,7 +10390,7 @@ const Exporter = (() => {
     const samples = []; for (const l of lists) { const stp = Math.max(1, Math.floor(l.length / 40)); for (let i = 0; i < l.length; i += stp) samples.push(l[i]); }
     const bgItems = backgroundItems(lists.length ? Engine.bboxOf(lists) : null, samples);
     const bgSig = JSON.stringify(bgItems.map(b => [b.color, b.rings.map(r => r.length), b.rings[0][0], b.rings[0][Math.floor(b.rings[0].length / 3)]]));
-    const items = bgItems.concat(live);
+    const items = Engine.backings(bgItems.concat(live), S, st.overrides, st.analysis, Clip.ready() ? Clip : null);
     /* lettering counts as a thread layer: where it would land on two stacked fills, the lower fill is cut away under it */
     let maskSig = '';
     if (S.layers >= 2 && S.textCut !== false && Clip.ready()) {
@@ -10328,7 +10406,7 @@ const Exporter = (() => {
       }
     }
     let res;
-    try { res = Engine.buildAll(items, S, st.overrides, st.analysis, { layers: S.layers, lighten: S.lighten, overlap: 0.5, sig: bgSig + maskSig }, Clip.ready() ? Clip : null); }
+    try { res = Engine.buildAll(items, S, st.overrides, st.analysis, { layers: S.layers, lighten: S.lighten, overlap: 0.5, sig: bgSig + maskSig + '|bk' + items.filter(i => i.backing).map(i => i.id).join(',') }, Clip.ready() ? Clip : null); }
     catch (e) { showMessages([{ err: true, text: 'This design could not be stitched: ' + e.message }]); $('busy').hidden = true; return; }
     st.objs = items.flatMap((item, i) => {
       const r = res[i];
